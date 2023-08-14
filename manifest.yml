@@ -52,7 +52,21 @@ actions:
   setup:      
     - cmd[cp]: |-
         echo '/root' >> /etc/jelastic/redeploy.conf
-        git clone https://github.com/jitsi/docker-jitsi-meet && cd docker-jitsi-meet;
+
+        # Find version number of latest release
+        function get_latest_release {
+          curl --silent "https://api.github.com/repos/jitsi/docker-jitsi-meet/releases/latest" |
+          grep '"tag_name":' |
+          sed -E 's/.*"([^"]+)".*/\1/' |
+          sed 's/v//'
+        }
+        LATEST=`get_latest_release`
+        # Download and unzip archive
+        wget https://github.com/jitsi/docker-jitsi-meet/archive/refs/tags/$LATEST.zip
+        unzip $LATEST.zip
+        mv docker-jitsi-meet* docker-jitsi-meet/
+        cd docker-jitsi-meet
+
         cp env.example .env;
 
         #check if region is in public suffix list
@@ -186,4 +200,4 @@ success: |
   **Password**: ${globals.password}    
 
   Useful links:
-  * [Secure, Simple and Scalable Video Conferencing with Jitsi](https://jelastic.com/blog/jitsi-video-conferencing/)
+  * [Secure, Simple and Scalable Video Conferencing with Jitsi](https://jitsi.github.io/handbook/docs/intro)
